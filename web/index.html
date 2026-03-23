@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agent Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/styles.css?v=20260323d">
+</head>
+<body>
+  <div class="page-shell">
+    <aside class="sidebar">
+      <div class="brand-block">
+        <p class="eyebrow">Multi-Agent Workspace</p>
+        <h1>Agent Studio</h1>
+        <p class="brand-copy">让用户在一个网页里同时观察、调度、追问多个智能体。</p>
+      </div>
+
+      <details class="panel panel-menu" open>
+        <summary class="panel-summary">
+          <div class="panel-summary-main">
+            <h2>参与智能体</h2>
+            <p>查看在线角色并选择参与讨论的智能体</p>
+          </div>
+          <span id="agentCount" class="panel-tag">4 在线</span>
+        </summary>
+        <div id="agentList" class="agent-list"></div>
+      </details>
+
+      <details class="panel panel-menu">
+        <summary class="panel-summary">
+          <div class="panel-summary-main">
+            <h2>会话控制</h2>
+            <p>切换协作模式并查看当前会话状态</p>
+          </div>
+          <span class="panel-tag subtle">原型模式</span>
+        </summary>
+        <div class="mode-switches">
+          <button class="mode-chip active" data-mode="round_robin">轮询协作</button>
+          <button class="mode-chip" data-mode="planner_first">规划优先</button>
+          <button class="mode-chip" data-mode="fast_review">快速复核</button>
+        </div>
+        <div class="status-card">
+          <span class="status-dot"></span>
+          <div>
+            <strong>当前状态</strong>
+            <p id="sessionStatus">等待用户发起新问题</p>
+          </div>
+        </div>
+      </details>
+    </aside>
+
+    <main class="workspace">
+      <section class="hero-card">
+        <div>
+          <p class="eyebrow">Collaborative Console</p>
+          <h2>多智能体交互网页原型</h2>
+          <p class="hero-copy">
+            用户输入一个问题后，多个智能体会分别给出视角化回复。当前版本先用前端模拟多角色协作，
+            后续可以把消息发送到 AutoGen 后端。
+          </p>
+        </div>
+        <div class="hero-metrics">
+          <div class="metric">
+            <span>活跃角色</span>
+            <strong id="metricAgents">4</strong>
+          </div>
+          <div class="metric">
+            <span>消息总数</span>
+            <strong id="metricMessages">0</strong>
+          </div>
+          <div class="metric">
+            <span>会话模式</span>
+            <strong id="metricMode">轮询协作</strong>
+          </div>
+        </div>
+      </section>
+
+      <div class="workspace-grid">
+        <section class="conversation-panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Conversation Flow</p>
+              <h3>智能体聊天流</h3>
+            </div>
+            <div class="header-actions">
+              <button id="seedScenarioButton" class="ghost-button">填入示例问题</button>
+              <button id="clearButton" class="ghost-button">清空会话</button>
+            </div>
+          </div>
+          <div id="conversationBoard" class="conversation-stream"></div>
+        </section>
+
+        <section class="composer-panel">
+          <div class="panel-header compact">
+            <div>
+              <p class="eyebrow">Prompt Composer</p>
+              <h3>向多个智能体发起问题</h3>
+            </div>
+          </div>
+
+          <div class="prompt-suggestions">
+            <button class="suggestion-chip">帮我设计一个 AI 客服系统的 MVP</button>
+            <button class="suggestion-chip">分析一个多智能体网页产品的技术方案</button>
+            <button class="suggestion-chip">给出需求、架构、开发、测试的联合建议</button>
+          </div>
+
+          <label class="composer-label" for="promptInput">用户问题</label>
+          <textarea id="promptInput" placeholder="例如：请为一个面向大学生的学习助手设计产品方案、技术架构和上线计划。"></textarea>
+
+          <div class="composer-footer">
+            <p class="footer-tip">当前原型支持多智能体并行展示，后续可以把这里接到 AutoGen 的实际群聊结果。</p>
+            <button id="sendButton" class="send-button">发起多智能体讨论</button>
+          </div>
+          <div id="debugPanel" class="debug-panel" aria-live="polite">
+            <strong>调试状态</strong>
+            <p id="debugStatus">页面已加载，等待操作。</p>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <template id="agentCardTemplate">
+    <label class="agent-card">
+      <input type="checkbox" checked>
+      <span class="agent-indicator"></span>
+      <div class="agent-card-body">
+        <div class="agent-card-head">
+          <strong class="agent-name"></strong>
+          <span class="agent-role-tag"></span>
+        </div>
+        <p class="agent-description"></p>
+      </div>
+    </label>
+  </template>
+
+  <template id="streamPlaceholderTemplate">
+    <section class="stream-placeholder">
+      <p>等待新的用户问题...</p>
+    </section>
+  </template>
+
+  <template id="bubbleTemplate">
+    <article class="chat-row">
+      <div class="chat-avatar"></div>
+      <div class="message-bubble">
+        <div class="bubble-meta">
+          <div class="bubble-speaker-group">
+            <strong class="bubble-speaker"></strong>
+            <span class="bubble-role"></span>
+          </div>
+          <span class="bubble-time"></span>
+        </div>
+        <div class="bubble-content"></div>
+      </div>
+    </article>
+  </template>
+
+  <script>
+    window.AGENT_LIST_ENDPOINT = "/api/agents";
+    window.AGENT_API_ENDPOINT = "/api/agent-replies";
+    window.SINGLE_AGENT_API_ENDPOINT = "/api/agent-reply";
+    window.REQUEST_TIMEOUT_MS = 120000;
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+  <script src="/static/app.js?v=20260323d"></script>
+</body>
+</html>
