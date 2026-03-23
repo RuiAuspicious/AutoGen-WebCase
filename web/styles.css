@@ -329,7 +329,8 @@ input {
 .conversation-stream {
   min-height: 560px;
   max-height: calc(100vh - 220px);
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   margin-top: 18px;
   padding: 10px 6px 10px 2px;
   display: grid;
@@ -356,6 +357,7 @@ input {
   grid-template-columns: 48px minmax(0, 1fr);
   gap: 14px;
   align-items: start;
+  min-width: 0;
 }
 
 .chat-avatar {
@@ -380,6 +382,9 @@ input {
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.84);
   border: 1px solid rgba(65, 47, 24, 0.08);
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .bubble-meta {
@@ -414,6 +419,8 @@ input {
   line-height: 1.78;
   display: grid;
   gap: 12px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .bubble-content > :first-child {
@@ -422,6 +429,11 @@ input {
 
 .bubble-content > :last-child {
   margin-bottom: 0;
+}
+
+.bubble-content > * {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .bubble-content p,
@@ -511,12 +523,23 @@ input {
 }
 
 .bubble-content table {
-  width: 100%;
+  width: max-content;
+  min-width: 100%;
   border-collapse: collapse;
-  overflow: hidden;
-  border-radius: 14px;
   border: 1px solid rgba(65, 47, 24, 0.12);
   background: rgba(255, 255, 255, 0.78);
+}
+
+.bubble-content .table-scroll {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-radius: 14px;
+  border: 1px solid rgba(65, 47, 24, 0.08);
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .bubble-content thead {
@@ -529,6 +552,11 @@ input {
   border: 1px solid rgba(65, 47, 24, 0.1);
   text-align: left;
   vertical-align: top;
+  white-space: normal;
+  word-break: break-word;
+  min-width: 140px;
+  max-width: 320px;
+  line-height: 1.65;
 }
 
 .bubble-content th {

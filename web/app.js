@@ -207,6 +207,12 @@ function renderMarkdown(container, markdown) {
   });
 
   container.innerHTML = safeHtml;
+  container.querySelectorAll("table").forEach((table) => {
+    const wrapper = document.createElement("div");
+    wrapper.className = "table-scroll";
+    table.parentNode.insertBefore(wrapper, table);
+    wrapper.appendChild(table);
+  });
   container.querySelectorAll("a").forEach((link) => {
     link.target = "_blank";
     link.rel = "noreferrer noopener";
@@ -515,17 +521,12 @@ function delay(ms) {
 
 function syncSidebarMenus() {
   const menus = document.querySelectorAll(".panel-menu");
-  if (window.innerWidth <= 720) {
-    menus.forEach((menu, index) => {
-      menu.open = index === 0;
-    });
-  } else {
-    menus.forEach((menu, index) => {
-      if (index === 0) {
-        menu.open = true;
-      }
-    });
-  }
+  menus.forEach((menu) => {
+    if (!menu.dataset.initialized) {
+      menu.open = false;
+      menu.dataset.initialized = "true";
+    }
+  });
 }
 
 document.querySelectorAll(".mode-chip").forEach((button) => {
